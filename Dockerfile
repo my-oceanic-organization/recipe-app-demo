@@ -1,9 +1,6 @@
 # Multi-stage build for Recipe App with optimized build time
 FROM node:18-alpine AS base
 
-# Record build start time
-RUN echo "$(date +%s)" > /build_start.txt
-
 # Install dependencies only when needed - optimized layer caching
 FROM base AS deps
 WORKDIR /app
@@ -66,10 +63,6 @@ WORKDIR /app/backend
 RUN npm install --only=production --legacy-peer-deps --prefer-offline --no-audit && \
     npm cache clean --force
 
-# Copy startup script
-COPY --chown=nextjs:nodejs docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
 # Switch to non-root user
 USER nextjs
 
@@ -80,11 +73,14 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Final build time summary
-RUN BUILD_START=$(cat /build_start.txt) && \
-    BUILD_END=$(date +%s) && \
-    BUILD_DURATION=$((BUILD_END - BUILD_START)) && \
-    echo "Build duration: ${BUILD_DURATION} seconds"
+
+
+# Seed database
+RUN echo "🌱 Seeding database..." && \
+    npx tsx src/db/seed.ts && \
+    echo "✅ Database seeded!"
 
 # Start the application
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD echo "🚀 Starting Recipe App..." && \
+    echo "🚀 Starting server on port 3000..." && \
+    node dist/index.js
