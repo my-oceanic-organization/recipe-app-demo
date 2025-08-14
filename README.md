@@ -1,4 +1,4 @@
-# Recipe AI App
+# Recipe App
 
 A modern recipe database application with a Node.js backend, React frontend, and PostgreSQL database.
 

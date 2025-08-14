@@ -1,66 +1,70 @@
-# Multi-stage build for fast builds
+# Multi-stage build for Recipe App with optimized build time
 FROM node:18-alpine AS base
 
 # Record build start time
 RUN echo "$(date +%s)" > /build_start.txt
 
-# Install dependencies only when needed
+# Install dependencies only when needed - optimized layer caching
 FROM base AS deps
 WORKDIR /app
 
-# Copy package files
+# Copy only package files first for better caching
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 
-# Install dependencies
-RUN npm install --only=production --legacy-peer-deps --force && npm cache clean --force
+# Install dependencies with optimized flags
+RUN npm install --only=production --legacy-peer-deps --prefer-offline --no-audit && \
+    npm cache clean --force
 
-# Build the frontend
+# Build the frontend with optimized caching
 FROM base AS frontend-builder
 WORKDIR /app
 
-# Copy frontend files
+# Copy package files first
 COPY frontend/package*.json ./frontend/
-COPY frontend/ ./frontend/
-
-# Install frontend dependencies and build
 WORKDIR /app/frontend
-RUN npm install --legacy-peer-deps --force
+
+# Install dependencies with optimized flags
+RUN npm install --legacy-peer-deps --prefer-offline --no-audit
+
+# Copy source and build
+COPY frontend/ ./
 RUN npm run build
 
-# Build the backend
+# Build the backend with optimized caching
 FROM base AS backend-builder
 WORKDIR /app
 
-# Copy backend files
+# Copy package files first
 COPY backend/package*.json ./backend/
-COPY backend/ ./backend/
-
-# Install backend dependencies and build
 WORKDIR /app/backend
-RUN npm install --legacy-peer-deps --force
+
+# Install dependencies with optimized flags
+RUN npm install --legacy-peer-deps --prefer-offline --no-audit
+
+# Copy source and build
+COPY backend/ ./
 RUN npm run build
 
-# Production stage
+# Production stage - minimal and optimized
 FROM base AS runner
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Copy built applications
+# Copy only necessary files from builders
 COPY --from=frontend-builder --chown=nextjs:nodejs /app/frontend/dist ./frontend/dist
 COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/dist ./backend/dist
 COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/package*.json ./backend/
-
-# Copy seed script
 COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/src/db/seed.ts ./backend/src/db/seed.ts
 
-# Install only production dependencies for backend
+# Install only production dependencies
 WORKDIR /app/backend
-RUN npm install --only=production --legacy-peer-deps --force && npm cache clean --force
+RUN npm install --only=production --legacy-peer-deps --prefer-offline --no-audit && \
+    npm cache clean --force
 
 # Copy startup script
 COPY --chown=nextjs:nodejs docker-entrypoint.sh /app/
@@ -75,10 +79,6 @@ EXPOSE 3000
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
-
-# Health check (commented out for OCI compatibility)
-# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-#   CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Final build time summary
 RUN BUILD_START=$(cat /build_start.txt) && \
