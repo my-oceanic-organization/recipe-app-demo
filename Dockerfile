@@ -1,6 +1,9 @@
 # Multi-stage build for fast builds
 FROM node:18-alpine AS base
 
+# Record build start time
+RUN echo "$(date +%s)" > /build_start.txt
+
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
@@ -11,7 +14,7 @@ COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 
 # Install dependencies
-RUN npm install --only=production && npm cache clean --force
+RUN npm install --only=production --legacy-peer-deps --force && npm cache clean --force
 
 # Build the frontend
 FROM base AS frontend-builder
@@ -23,7 +26,7 @@ COPY frontend/ ./frontend/
 
 # Install frontend dependencies and build
 WORKDIR /app/frontend
-RUN npm install
+RUN npm install --legacy-peer-deps --force
 RUN npm run build
 
 # Build the backend
@@ -36,7 +39,7 @@ COPY backend/ ./backend/
 
 # Install backend dependencies and build
 WORKDIR /app/backend
-RUN npm install
+RUN npm install --legacy-peer-deps --force
 RUN npm run build
 
 # Production stage
@@ -57,7 +60,7 @@ COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/src/db/seed.ts ./
 
 # Install only production dependencies for backend
 WORKDIR /app/backend
-RUN npm install --only=production && npm cache clean --force
+RUN npm install --only=production --legacy-peer-deps --force && npm cache clean --force
 
 # Copy startup script
 COPY --chown=nextjs:nodejs docker-entrypoint.sh /app/
@@ -67,15 +70,21 @@ RUN chmod +x /app/docker-entrypoint.sh
 USER nextjs
 
 # Expose port
-EXPOSE 3001
+EXPOSE 3000
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+# Health check (commented out for OCI compatibility)
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Final build time summary
+RUN BUILD_START=$(cat /build_start.txt) && \
+    BUILD_END=$(date +%s) && \
+    BUILD_DURATION=$((BUILD_END - BUILD_START)) && \
+    echo "Build duration: ${BUILD_DURATION} seconds"
 
 # Start the application
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

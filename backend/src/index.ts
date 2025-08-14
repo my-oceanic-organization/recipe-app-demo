@@ -5,7 +5,7 @@ import { recipeRoutes } from "./routes/recipes";
 import path from "path";
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Database connection
 const pool = new Pool({

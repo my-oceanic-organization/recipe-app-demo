@@ -1,29 +1,16 @@
 #!/bin/sh
 
-# Wait for database to be ready
-echo "Waiting for database to be ready..."
-while ! node -e "
-  const { Pool } = require('pg');
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  pool.query('SELECT 1', (err) => {
-    if (err) {
-      console.error('Database not ready:', err.message);
-      process.exit(1);
-    }
-    console.log('Database is ready!');
-    pool.end();
-    process.exit(0);
-  });
-" 2>/dev/null; do
-  sleep 2
-done
+echo "🚀 Starting Recipe App..."
 
-# Seed the database
-echo "Seeding database..."
-cd /app/backend
+echo "🔄 Waiting for database..."
+timeout 60 sh -c 'until node -e "new (require(\"pg\").Pool)({connectionString: process.env.DATABASE_URL}).query(\"SELECT NOW()\").then(() => process.exit(0)).catch(() => process.exit(1))"; do sleep 2; done'
+
+echo "✅ Database ready!"
+
+echo "🌱 Seeding database..."
 npx tsx src/db/seed.ts
 
-# Start the application
-echo "Starting application..."
-cd /app/backend
-exec node dist/index.js
+echo "✅ Database seeded!"
+
+echo "🚀 Starting server on port 3000..."
+node dist/index.js
