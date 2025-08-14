@@ -13,6 +13,9 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false,
     checkServerIdentity: () => undefined,
+    ca: undefined,
+    cert: undefined,
+    key: undefined,
   },
 });
 
