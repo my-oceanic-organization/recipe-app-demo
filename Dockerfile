@@ -2,35 +2,22 @@
 # syntax=docker/dockerfile:1.4
 FROM node:18-alpine AS base
 
-# Build the frontend with optimized caching
-FROM base AS frontend-builder
+# Install all dependencies and build
+FROM base AS builder
 WORKDIR /app
 
 # Copy package files first for better layer caching
 COPY package*.json ./
 
-# Install dependencies with cache mount for faster rebuilds
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --legacy-peer-deps --prefer-offline --no-audit
-
-# Copy source and build
-COPY frontend/ ./frontend/
-WORKDIR /app/frontend
-RUN npm run build
-
-# Build the backend with optimized caching
-FROM base AS backend-builder
-WORKDIR /app
-
-# Copy package files first for better layer caching
-COPY package*.json ./
-
-# Install dependencies with cache mount for faster rebuilds
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --legacy-peer-deps --prefer-offline --no-audit
+# Install all dependencies
+RUN npm ci
 
 # Copy source files
-COPY backend/ ./backend/
+COPY . .
+
+# Build the frontend
+WORKDIR /app/frontend
+RUN npm run build
 
 # Production stage - minimal and optimized
 FROM node:18-alpine AS runner
@@ -40,15 +27,13 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 demouser
 
-# Copy only necessary files from builders
-COPY --from=frontend-builder --chown=demouser:nodejs /app/frontend/dist ./frontend/dist
-COPY --from=backend-builder --chown=demouser:nodejs /app/backend/src ./backend/src
-COPY --from=backend-builder --chown=demouser:nodejs /app/package*.json ./
+# Copy only necessary files from builder
+COPY --from=builder --chown=demouser:nodejs /app/frontend/dist ./frontend/dist
+COPY --from=builder --chown=demouser:nodejs /app/backend/src ./backend/src
+COPY --from=builder --chown=demouser:nodejs /app/package*.json ./
 
-# Install only production dependencies with cache mount
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --only=production --legacy-peer-deps --prefer-offline --no-audit && \
-    npm cache clean --force
+# Copy only production dependencies
+COPY --from=builder --chown=demouser:nodejs /app/node_modules ./node_modules
 
 # Switch to non-root user
 USER demouser

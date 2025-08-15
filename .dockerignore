@@ -131,11 +131,6 @@ docs/
 .travis.yml
 .circleci/
 
-# Package manager files
-yarn.lock
-pnpm-lock.yaml
-package-lock.json
-
 # TypeScript
 *.tsbuildinfo
 
