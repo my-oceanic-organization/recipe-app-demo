@@ -1,8 +1,8 @@
-import express from "express";
-import cors from "cors";
-import { Pool } from "pg";
-import { recipeRoutes } from "./routes/recipes";
-import path from "path";
+const express = require("express");
+const cors = require("cors");
+const { Pool } = require("pg");
+const { recipeRoutes } = require("./routes/recipes");
+const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -40,20 +40,13 @@ app.get("*", (req, res) => {
 });
 
 // Error handling middleware
-app.use(
-  (
-    err: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Something went wrong!" });
-  }
-);
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-export { pool };
+module.exports = { pool };

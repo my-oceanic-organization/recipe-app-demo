@@ -1,7 +1,6 @@
-import { Router } from "express";
-import { Pool } from "pg";
+const { Router } = require("express");
 
-export const recipeRoutes = (pool: Pool) => {
+const recipeRoutes = (pool) => {
   const router = Router();
 
   // Get all recipes with search
@@ -13,7 +12,7 @@ export const recipeRoutes = (pool: Pool) => {
         SELECT id, title, description, cooking_time, difficulty, image_url, created_at
         FROM recipes
       `;
-      const params: any[] = [];
+      const params = [];
 
       if (search) {
         query += ` WHERE title ILIKE $1 OR description ILIKE $1`;
@@ -54,3 +53,5 @@ export const recipeRoutes = (pool: Pool) => {
 
   return router;
 };
+
+module.exports = { recipeRoutes };

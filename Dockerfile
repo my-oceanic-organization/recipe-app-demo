@@ -40,9 +40,9 @@ WORKDIR /app/backend
 # Install dependencies with optimized flags
 RUN npm install --legacy-peer-deps --prefer-offline --no-audit
 
-# Copy source and build
+# Copy source files
 COPY backend/ ./
-RUN npm run build
+RUN echo "Backend files copied"
 
 # Production stage - minimal and optimized
 FROM base AS runner
@@ -54,9 +54,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # Copy only necessary files from builders
 COPY --from=frontend-builder --chown=nextjs:nodejs /app/frontend/dist ./frontend/dist
-COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/dist ./backend/dist
+COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/src ./backend/src
 COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/package*.json ./backend/
-COPY --from=backend-builder --chown=nextjs:nodejs /app/backend/src/db/seed.ts ./backend/src/db/seed.ts
 
 # Install only production dependencies
 WORKDIR /app/backend
@@ -79,7 +78,7 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 # Start the application
 CMD echo "🚀 Starting Recipe App..." && \
     echo "🌱 Seeding database..." && \
-    npx tsx src/db/seed.ts && \
+    node src/db/seed.js && \
     echo "✅ Database seeded!" && \
     echo "🚀 Starting server on port 3000..." && \
-    node dist/index.js
+    node src/index.js
