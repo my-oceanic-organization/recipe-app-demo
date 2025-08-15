@@ -76,12 +76,10 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 
 
-# Seed database
-RUN echo "🌱 Seeding database..." && \
-    npx tsx src/db/seed.ts && \
-    echo "✅ Database seeded!"
-
 # Start the application
 CMD echo "🚀 Starting Recipe App..." && \
+    echo "🌱 Seeding database..." && \
+    npx tsx src/db/seed.ts && \
+    echo "✅ Database seeded!" && \
     echo "🚀 Starting server on port 3000..." && \
     node dist/index.js
