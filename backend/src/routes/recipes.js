@@ -51,6 +51,60 @@ const recipeRoutes = (pool) => {
     }
   });
 
+  // Like a recipe
+  router.post("/:id/like", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Check if recipe exists
+      const checkResult = await pool.query(
+        "SELECT id FROM recipes WHERE id = $1",
+        [id]
+      );
+
+      if (checkResult.rows.length === 0) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      // Set liked_at to current timestamp
+      const query =
+        "UPDATE recipes SET liked_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *";
+      const result = await pool.query(query, [id]);
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error liking recipe:", error);
+      res.status(500).json({ error: "Failed to like recipe" });
+    }
+  });
+
+  // Unlike a recipe
+  router.post("/:id/unlike", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Check if recipe exists
+      const checkResult = await pool.query(
+        "SELECT id FROM recipes WHERE id = $1",
+        [id]
+      );
+
+      if (checkResult.rows.length === 0) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      // Set liked_at to NULL
+      const query =
+        "UPDATE recipes SET liked_at = NULL WHERE id = $1 RETURNING *";
+      const result = await pool.query(query, [id]);
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error unliking recipe:", error);
+      res.status(500).json({ error: "Failed to unlike recipe" });
+    }
+  });
+
   return router;
 };
 

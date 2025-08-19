@@ -7,6 +7,38 @@ const RecipeDetail = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [likeInProgress, setLikeInProgress] = useState(false);
+
+  const toggleLike = useCallback(async () => {
+    if (!recipe) return;
+
+    try {
+      setLikeInProgress(true);
+
+      const endpoint = recipe.liked_at
+        ? `/api/recipes/${recipe.id}/unlike`
+        : `/api/recipes/${recipe.id}/like`;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to ${recipe.liked_at ? "unlike" : "like"} recipe`
+        );
+      }
+
+      const updatedRecipe = await response.json();
+      setRecipe(updatedRecipe);
+    } catch (err) {
+      console.error("Error toggling like status:", err);
+    } finally {
+      setLikeInProgress(false);
+    }
+  }, [recipe]);
 
   const fetchRecipe = useCallback(async (recipeId: string) => {
     try {
@@ -97,13 +129,33 @@ const RecipeDetail = () => {
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-gray-900">{recipe.title}</h1>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-bold ${getDifficultyColor(
-                recipe.difficulty
-              )}`}
-            >
-              {recipe.difficulty}
-            </span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleLike}
+                disabled={likeInProgress}
+                className="flex items-center justify-center w-10 h-10 ml-4 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                aria-label={recipe.liked_at ? "Unlike recipe" : "Like recipe"}
+              >
+                {likeInProgress ? (
+                  <span className="animate-pulse">❤️</span>
+                ) : (
+                  <span
+                    className={
+                      recipe.liked_at ? "text-red-500" : "text-gray-400"
+                    }
+                  >
+                    {recipe.liked_at ? "❤️" : "🤍"}
+                  </span>
+                )}
+              </button>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-bold ${getDifficultyColor(
+                  recipe.difficulty
+                )}`}
+              >
+                {recipe.difficulty}
+              </span>
+            </div>
           </div>
 
           <p className="text-gray-600 text-lg mb-6">{recipe.description}</p>

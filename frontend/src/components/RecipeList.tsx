@@ -25,9 +25,53 @@ const RecipeList = () => {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const [likeInProgress, setLikeInProgress] = useState<Record<number, boolean>>(
+    {}
+  );
 
   // Debounce search term to avoid excessive API calls
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  const toggleLike = useCallback(
+    async (recipe: RecipeSummary, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      try {
+        setLikeInProgress((prev) => ({ ...prev, [recipe.id]: true }));
+
+        const endpoint = recipe.liked_at
+          ? `/api/recipes/${recipe.id}/unlike`
+          : `/api/recipes/${recipe.id}/like`;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to ${recipe.liked_at ? "unlike" : "like"} recipe`
+          );
+        }
+
+        const updatedRecipe = await response.json();
+
+        // Update the recipes array with the updated recipe
+        setRecipes((prevRecipes) =>
+          prevRecipes.map((r) =>
+            r.id === updatedRecipe.id ? updatedRecipe : r
+          )
+        );
+      } catch (err) {
+        console.error("Error toggling like status:", err);
+      } finally {
+        setLikeInProgress((prev) => ({ ...prev, [recipe.id]: false }));
+      }
+    },
+    []
+  );
 
   const fetchRecipes = useCallback(
     async (search: string, isSearch: boolean = false) => {
@@ -111,9 +155,25 @@ const RecipeList = () => {
           />
         </div>
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-3">
-            {recipe.title}
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-bold text-gray-900">{recipe.title}</h2>
+            <button
+              onClick={(e) => toggleLike(recipe, e)}
+              disabled={likeInProgress[recipe.id]}
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors duration-200"
+              aria-label={recipe.liked_at ? "Unlike recipe" : "Like recipe"}
+            >
+              {likeInProgress[recipe.id] ? (
+                <span className="animate-pulse">❤️</span>
+              ) : (
+                <span
+                  className={recipe.liked_at ? "text-red-500" : "text-gray-400"}
+                >
+                  {recipe.liked_at ? "❤️" : "🤍"}
+                </span>
+              )}
+            </button>
+          </div>
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
             {recipe.description}
           </p>
