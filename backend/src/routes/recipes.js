@@ -9,7 +9,7 @@ const recipeRoutes = (pool) => {
       const { search, limit = 20, offset = 0 } = req.query;
 
       let query = `
-        SELECT id, title, description, cooking_time, difficulty, image_url, created_at
+        SELECT id, title, description, cooking_time, difficulty, image_url, created_at, liked_at
         FROM recipes
       `;
       const params = [];
