@@ -10,13 +10,15 @@ const port = process.env.BACKEND_PORT || 3001;
 // Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-    checkServerIdentity: () => undefined,
-    ca: undefined,
-    cert: undefined,
-    key: undefined,
-  },
+  ssl: process.env.DATABASE_URL.includes("localhost")
+    ? undefined
+    : {
+        rejectUnauthorized: false,
+        checkServerIdentity: () => undefined,
+        ca: undefined,
+        cert: undefined,
+        key: undefined,
+      },
 });
 
 // Middleware
