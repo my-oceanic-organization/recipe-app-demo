@@ -71,7 +71,7 @@ A modern recipe database application with a Node.js backend, React frontend, and
    ```bash
    podman run -d \
      --name recipe-app \
-     -p 3001:3001 \
+     -p 3000:3000 \
      -e DATABASE_URL="postgresql://username:password@host:5432/recipe_db" \
      recipe-ai-app
    ```
@@ -147,7 +147,9 @@ recipe-ai-app/
 ## Environment Variables
 
 - `DATABASE_URL` - PostgreSQL connection string (required)
-- `PORT` - Server port (default: 3001)
+- `PORT` - Frontend port (default: 3000)
+- `BACKEND_PORT` - Server port (default: 3001)
+  - No need for exposing from the container, there's already reverse proxy in place to access this internal port via the /api route.
 - `NODE_ENV` - Environment mode (development/production)
 
 ## Contributing
