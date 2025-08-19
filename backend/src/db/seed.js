@@ -27,7 +27,8 @@ const createTables = async () => {
         difficulty VARCHAR(50) NOT NULL,
         servings INTEGER DEFAULT 4,
         image_url VARCHAR(500),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        liked_at TIMESTAMP
       );
     `);
     console.log("Tables created successfully");
@@ -326,7 +327,8 @@ const seedData = async () => {
       },
       {
         title: "Quinoa Buddha Bowl",
-        description: "Healthy vegetarian bowl with quinoa and roasted vegetables",
+        description:
+          "Healthy vegetarian bowl with quinoa and roasted vegetables",
         ingredients: [
           "1 cup quinoa",
           "1 sweet potato, cubed",
@@ -524,7 +526,8 @@ const seedData = async () => {
       },
       {
         title: "Pad Thai",
-        description: "Authentic Thai stir-fried rice noodles with shrimp and peanuts",
+        description:
+          "Authentic Thai stir-fried rice noodles with shrimp and peanuts",
         ingredients: [
           "200g rice noodles",
           "200g shrimp",
@@ -554,7 +557,8 @@ const seedData = async () => {
       },
       {
         title: "French Onion Soup",
-        description: "Classic French soup with caramelized onions and melted cheese",
+        description:
+          "Classic French soup with caramelized onions and melted cheese",
         ingredients: [
           "4 large onions, thinly sliced",
           "4 tbsp butter",
@@ -640,7 +644,8 @@ const seedData = async () => {
       },
       {
         title: "Greek Moussaka",
-        description: "Layered eggplant casserole with ground lamb and béchamel sauce",
+        description:
+          "Layered eggplant casserole with ground lamb and béchamel sauce",
         ingredients: [
           "2 large eggplants, sliced",
           "500g ground lamb",
@@ -763,7 +768,8 @@ const seedData = async () => {
       },
       {
         title: "Chicken Curry",
-        description: "Spicy Indian curry with tender chicken and aromatic spices",
+        description:
+          "Spicy Indian curry with tender chicken and aromatic spices",
         ingredients: [
           "800g chicken breast, cubed",
           "2 tbsp curry powder",

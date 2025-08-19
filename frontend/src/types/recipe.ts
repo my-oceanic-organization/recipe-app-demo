@@ -9,6 +9,7 @@ export interface Recipe {
   servings: number;
   image_url: string;
   created_at: string;
+  liked_at: string | null;
 }
 
 export interface RecipeSummary {
@@ -19,4 +20,5 @@ export interface RecipeSummary {
   difficulty: string;
   image_url: string;
   created_at: string;
+  liked_at: string | null;
 }
