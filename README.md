@@ -38,19 +38,26 @@ A modern recipe database application with a Node.js backend, React frontend, and
 2. **Install dependencies**
 
    ```bash
-   npm ci
+   npm install
    ```
 
-3. **Start the development servers**
+3. **Set up environment variables**
 
    ```bash
-   DATABASE_URL=<some Postgres URL here, don't require SSL in dev> npm run dev
+   # Create .env file in the root directory
+   echo "DATABASE_URL=postgresql://username:password@localhost:5432/recipe_db" > .env
+   ```
+
+4. **Start the development servers**
+
+   ```bash
+   npm run dev
    ```
 
    This will start:
 
-   - Frontend development server on http://localhost:3000
    - Backend server on http://localhost:3001
+   - Frontend development server on http://localhost:3000
 
 ### Docker Setup
 
