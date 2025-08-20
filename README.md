@@ -140,9 +140,8 @@ recipe-ai-app/
 ## Environment Variables
 
 - `DATABASE_URL` - PostgreSQL connection string (required)
-- `PORT` - Frontend port (default: 3000)
-- `BACKEND_PORT` - Server port (default: 3001)
-  - No need for exposing from the container, there's already reverse proxy in place to access this internal port via the /api route.
+- `FRONTEND_DEV_PORT` - Frontend port (default: 5000)
+- `SERVER_PORT` - Server port (default: 3000)
 - `NODE_ENV` - Environment mode (development/production)
 
 ## Contributing
