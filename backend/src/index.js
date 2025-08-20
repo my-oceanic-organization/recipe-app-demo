@@ -5,12 +5,12 @@ const { recipeRoutes } = require("./routes/recipes");
 const path = require("path");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.SERVER_PORT || 3000;
 
 // Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes("localhost")
+  ssl: process.env.DATABASE_URL?.includes("localhost")
     ? undefined
     : {
         rejectUnauthorized: false,

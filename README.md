@@ -140,7 +140,8 @@ recipe-ai-app/
 ## Environment Variables
 
 - `DATABASE_URL` - PostgreSQL connection string (required)
-- `PORT` - Server port (default: 3001)
+- `FRONTEND_DEV_PORT` - Frontend port (default: 5000)
+- `SERVER_PORT` - Server port (default: 3000)
 - `NODE_ENV` - Environment mode (development/production)
 
 ## Contributing
