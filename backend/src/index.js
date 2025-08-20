@@ -49,4 +49,10 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
+process.on('SIGINT', function() {
+  console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+  // some other closing procedures go here
+  process.exit(0);
+});
+
 module.exports = { pool };
