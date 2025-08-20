@@ -5,7 +5,7 @@ const { recipeRoutes } = require("./routes/recipes");
 const path = require("path");
 
 const app = express();
-const port = process.env.BACKEND_PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Database connection
 const pool = new Pool({
