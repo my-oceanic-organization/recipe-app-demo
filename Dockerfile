@@ -80,5 +80,5 @@ CMD echo "🚀 Starting Recipe App..." && \
     echo "🌱 Seeding database..." && \
     node src/db/seed.js && \
     echo "✅ Database seeded!" && \
-    echo "🚀 Starting server on port 3000..." && \
+    echo "🚀 Starting server..." && \
     node src/index.js
