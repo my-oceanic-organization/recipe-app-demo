@@ -1,19 +1,6 @@
 # Multi-stage build for Recipe App with optimized build time
 FROM node:18-alpine AS base
 
-# Install dependencies only when needed - optimized layer caching
-FROM base AS deps
-WORKDIR /app
-
-# Copy only package files first for better caching
-COPY package*.json ./
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
-
-# Install dependencies with optimized flags
-RUN npm install --only=production --legacy-peer-deps --prefer-offline --no-audit && \
-    npm cache clean --force
-
 # Build the frontend with optimized caching
 FROM base AS frontend-builder
 WORKDIR /app
