@@ -20,6 +20,9 @@ RUN npm run build
 FROM base AS backend-builder
 WORKDIR /app
 
+RUN echo "Intentionally breaking the build:"
+UNSUPPORTEDCOMMAND
+
 # Copy package files first
 COPY backend/package*.json ./backend/
 WORKDIR /app/backend
